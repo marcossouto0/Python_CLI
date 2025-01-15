@@ -1,5 +1,5 @@
-from typing import Callable
-from os import system
+from typing import Callable, List, Tuple
+from os import system, name
 from colorama import init, Fore
 
 init(autoreset=True)
@@ -7,7 +7,7 @@ init(autoreset=True)
 class CLI:
 
     def __init__(self, title: str = "Main Menu", main_menu: bool = True):
-        self.options: list[list[str, Callable[[], None]]] = []
+        self.options: List[Tuple[str, Callable[[], None]]] = []
         self.title = title
         self.main_menu = main_menu
 
@@ -20,6 +20,10 @@ class CLI:
         while True:
             try:
                 n: int = int(input(Fore.YELLOW + 'Choose an option: '))
+                if 0 <= n < len(self.options)+1:
+                    return n
+                else:
+                    print(Fore.RED + 'ERROR! Option out of range. Please choose a valid option.')
 
             except (ValueError, TypeError):
                 print(Fore.RED + 'ERROR! Invalid input. Please enter a number.')
@@ -28,28 +32,13 @@ class CLI:
                 print(Fore.RED + '\nUser interrupted')
                 exit()
 
-            else:
-                if n == 0 or 1 <= n <= len(self.options):
-                    return n
-                else:
-                    print(Fore.RED + 'ERROR! Choose a valid option')
-
     def add_options(self, title: str, function: Callable[[], None]):
         """Adds an option to the menu."""
-        self.options.append([title, function])
+        self.options.append((title, function))
 
-    def run(self):
-        """Runs the CLI menu."""
-        system('cls')
-        if not self.options:
-            print(Fore.RED + 'No options added')
-            if self.main_menu:
-                input(Fore.YELLOW + 'Press enter to exit...')
-                return
-            else:
-                input(Fore.YELLOW + 'Press enter to go back...')
-                return
-
+    def display_menu(self) -> None:
+        """Displays the menu."""
+        system('cls' if name == 'nt' else 'clear')
         print(Fore.CYAN + self.__line())
         print(Fore.CYAN + self.title.center(42))
         print(Fore.CYAN + self.__line())
@@ -62,21 +51,27 @@ class CLI:
 
         if self.main_menu:
             print(Fore.GREEN + f'0 - {"Exit Program":>38}')
-
+        
         print(Fore.CYAN + self.__line())
 
-        choose = self.__choose()
-
-        if choose == 0 and self.main_menu:
-            exit()
-
-        if choose == 0 and not self.main_menu:
+    def run(self) -> None:
+        """Runs the CLI menu."""
+        if not self.options:
+            print(Fore.RED + 'No options added')
+            input(Fore.YELLOW + 'Press enter to exit...')
             return
 
-        if choose:
-            self.options[choose - 1][1]()
-            self.run()
-        return
+        while True:
+            self.display_menu()
+            choice = self.__choose()
+
+            if choice == 0:
+                if self.main_menu:
+                    break
+                else:
+                    return
+
+            self.options[choice - 1][1]()
 
 
 if __name__ == "__main__":
@@ -84,8 +79,13 @@ if __name__ == "__main__":
     calc = CLI("Calculator", False)
 
     def sum():
-        a = int(input('First number: '))
-        b = int(input('Second number: '))
+        while True:
+            try:
+                a = int(input('First number: '))
+                b = int(input('Second number: '))
+                break
+            except (ValueError, TypeError):
+                print(Fore.RED + 'ERROR! Invalid input. Please enter a number.')
         print(f'The sum of {a} + {b} is {a + b}')
         input('Press enter to go back...')
 
