@@ -20,7 +20,7 @@ class CLI:
         while True:
             try:
                 n: int = int(input(Fore.YELLOW + 'Choose an option: '))
-                if 0 <= n < len(self.options)+1:
+                if 0 <= n <= len(self.options):
                     return n
                 else:
                     print(Fore.RED + 'ERROR! Option out of range. Please choose a valid option.')
@@ -32,11 +32,11 @@ class CLI:
                 print(Fore.RED + '\nUser interrupted')
                 exit()
 
-    def add_options(self, title: str, function: Callable[[], None]):
+    def add_option(self, title: str, function: Callable[[], None]):
         """Adds an option to the menu."""
         self.options.append((title, function))
 
-    def display_menu(self) -> None:
+    def __display_menu(self) -> None:
         """Displays the menu."""
         system('cls' if name == 'nt' else 'clear')
         print(Fore.CYAN + self.__line())
@@ -62,7 +62,7 @@ class CLI:
             return
 
         while True:
-            self.display_menu()
+            self.__display_menu()
             choice = self.__choose()
 
             if choice == 0:
@@ -89,7 +89,7 @@ if __name__ == "__main__":
         print(f'The sum of {a} + {b} is {a + b}')
         input('Press enter to go back...')
 
-    calc.add_options("Sum", sum)
+    calc.add_option("Sum", sum)
 
-    main.add_options("Calculator", calc.run)
+    main.add_option("Calculator", calc.run)
     main.run()
